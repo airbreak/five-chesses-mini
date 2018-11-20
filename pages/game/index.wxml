@@ -1,0 +1,5 @@
+<!--pages/game/index.wxml-->
+<canvas
+  style="width: 320px; height: 568px;"
+  canvas-id="firstCanvas"
+  bindtouchstart="setChess"></canvas>
