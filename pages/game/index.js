@@ -12,6 +12,7 @@ Page({
   myWin: [],
   computerWin: [],
   wins: [],
+  winCounts: 0,
   over:false,
   me:true,
   chressBord: [],//棋盘
@@ -58,10 +59,10 @@ Page({
     var i = Math.floor(x / 30);
     var j = Math.floor(y / 30);
     if (this.chressBord[i][j] == 0) {
-      this.oneStep(i, j, me);
+      this.oneStep(i, j, this.me);
       this.chressBord[i][j] = 1;//我        
 
-      for (var k = 0; k < count; k++) {
+      for (var k = 0; k < this.winCounts; k++) {
         if (this.wins[i][j][k]) {
           this.myWin[k]++;
           this.computerWin[k] = 6;//这个位置对方不可能赢了
@@ -71,7 +72,7 @@ Page({
           }
         }
       }
-      if (!over) {
+      if (!this.over) {
         this.me = !this.me;
         this.computerAI();
       }
@@ -82,21 +83,21 @@ Page({
    * 画旗子
    */
   oneStep (i, j, me) {
-    context.beginPath();
-    context.arc(15 + i * 30, 15 + j * 30, 13, 0, 2 * Math.PI);//画圆
-    context.closePath();
+    this.context.beginPath();
+    this.context.arc(15 + i * 30, 15 + j * 30, 13, 0, 2 * Math.PI);//画圆
+    this.context.closePath();
     //渐变
-    var gradient = context.createRadialGradient(15 + i * 30 + 2, 15 + j * 30 - 2, 13, 15 + i * 30 + 2, 15 + j * 30 - 2, 0);
+    var gradient = this.context.createCircularGradient(15 + i * 30 + 2, 15 + j * 30 - 2, 13, 15 + i * 30 + 2, 15 + j * 30 - 2, 0);
 
-    if (me) {
+    if (this.me) {
       gradient.addColorStop(0, '#0a0a0a');
       gradient.addColorStop(1, '#636766');
     } else {
       gradient.addColorStop(0, '#d1d1d1');
       gradient.addColorStop(1, '#f9f9f9');
     }
-    context.fillStyle = gradient;
-    context.fill();
+    this.context.setFillStyle(gradient)
+    this.context.draw()
   },
 
   //绘画棋盘
@@ -172,6 +173,7 @@ Page({
       this.myWin[i] = 0;
       this.computerWin[i] = 0;
     }
+    this.winCounts = count
   },
 
   computerAI () {
@@ -190,15 +192,15 @@ Page({
     for (var i = 0; i < 15; i++) {
       for (var j = 0; j < 15; j++) {
         if (this.chressBord[i][j] == 0) {
-          for (var k = 0; k < count; k++) {
+          for (var k = 0; k < this.winCounts; k++) {
             if (this.wins[i][j][k]) {
               if (this.myWin[k] == 1) {
                 myScore[i][j] += 200;
-              } else if (myWin[k] == 2) {
+              } else if (this.myWin[k] == 2) {
                 myScore[i][j] += 400;
-              } else if (myWin[k] == 3) {
+              } else if (this.myWin[k] == 3) {
                 myScore[i][j] += 2000;
-              } else if (myWin[k] == 4) {
+              } else if (this.myWin[k] == 4) {
                 myScore[i][j] += 10000;
               }
 
@@ -206,9 +208,9 @@ Page({
                 computerScore[i][j] += 220;
               } else if (this.computerWin[k] == 2) {
                 computerScore[i][j] += 420;
-              } else if (computerWin[k] == 3) {
+              } else if (this.computerWin[k] == 3) {
                 computerScore[i][j] += 2100;
-              } else if (computerWin[k] == 4) {
+              } else if (this.computerWin[k] == 4) {
                 computerScore[i][j] += 20000;
               }
             }
