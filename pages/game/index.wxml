@@ -1,5 +1,6 @@
 <!--pages/game/index.wxml-->
 <canvas
-  style="width: 320px; height: 568px;"
-  canvas-id="firstCanvas"
-  bindtouchstart="setChess"></canvas>
+   style='width:{{canvasWidth}}px; height:{{canvasHeight}}px'
+   disable-scroll='true'
+   canvas-id="firstCanvas"
+   bindtouchstart="setChess"></canvas>

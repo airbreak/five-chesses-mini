@@ -16,11 +16,13 @@ Page({
   over:false,
   me:true,
   chressBord: [],//棋盘
+  perWidth: 20,
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
+    this.setCanvasSize()
     // let logo = new Image();
     // logo.src = 'img/logo.png';
     // logo.onload = function () {
@@ -29,6 +31,21 @@ Page({
     // }
     this.iniWins()
     this.initChressBord()
+  },
+
+  setCanvasSize () {
+    let that = this
+    wx.getSystemInfo({
+      success (res) {
+        that.canvasWidth = res.windowWidth
+        // that.canvasHeight = res.windowHeight
+        that.setData({
+          canvasWidth: that.canvasWidth,
+          canvasHeight: that.canvasWidth
+        })
+        that.perWidth = Math.floor(this.canvasWidth / 15)
+      }
+    })
   },
 
   /**
@@ -42,6 +59,7 @@ Page({
     this.drawChessBoard();
   },
   setChess(e) {
+    console.log('one more time')
     if (this.over) {
       return;
     }
@@ -56,8 +74,8 @@ Page({
     if (y < 0) {
       y = 0
     }
-    var i = Math.floor(x / 30);
-    var j = Math.floor(y / 30);
+    var i = Math.round(x / this.perWidth);
+    var j = Math.round(y / this.perWidth);
     if (this.chressBord[i][j] == 0) {
       this.oneStep(i, j, this.me);
       this.chressBord[i][j] = 1;//我        
@@ -67,14 +85,26 @@ Page({
           this.myWin[k]++;
           this.computerWin[k] = 6;//这个位置对方不可能赢了
           if (this.myWin[k] == 5) {
-            console.log('你赢了');
+            wx.showModal({
+              title: '提示',
+              content: '你赢了,你牛逼。是否再来一局',
+              success(res) {
+                if (res.confirm) {
+                  
+                } else if (res.cancel) {
+
+                }
+              }
+            })
             this.over = true;
           }
         }
       }
       if (!this.over) {
         this.me = !this.me;
-        this.computerAI();
+        setTimeout(()=>{
+          this.computerAI();
+        },500)
       }
     }
   },
@@ -84,33 +114,30 @@ Page({
    */
   oneStep (i, j, me) {
     this.context.beginPath();
-    this.context.arc(15 + i * 30, 15 + j * 30, 13, 0, 2 * Math.PI);//画圆
+    this.context.arc(15 + i * this.perWidth, 15 + j * this.perWidth, this.perWidth/2, 0, 2 * Math.PI);//画圆
     this.context.closePath();
-    //渐变
-    var gradient = this.context.createCircularGradient(15 + i * 30 + 2, 15 + j * 30 - 2, 13, 15 + i * 30 + 2, 15 + j * 30 - 2, 0);
-
+  
     if (this.me) {
-      gradient.addColorStop(0, '#0a0a0a');
-      gradient.addColorStop(1, '#636766');
+      this.context.setFillStyle('#EEEEEE')
     } else {
-      gradient.addColorStop(0, '#d1d1d1');
-      gradient.addColorStop(1, '#f9f9f9');
+      this.context.setFillStyle('#000000')
     }
-    this.context.setFillStyle(gradient)
-    this.context.draw()
+    this.context.fill()
+
+    this.context.draw(true)
   },
 
   //绘画棋盘
   drawChessBoard () {
     for (var i = 0; i < 15; i++) {
       this.context.save()
-      this.context.moveTo(15 + i * 30, 15)
-      this.context.lineTo(15 + i * 30, 435)
+      this.context.moveTo(15 + i * this.perWidth, 15)
+      this.context.lineTo(15 + i * this.perWidth, this.canvasWidth - 15)
       this.context.stroke()
       
-      this.context.moveTo(15, 15 + i * 30);
-      this.context.lineTo(435, 15 + i * 30);
-      this.context.stroke();
+      this.context.moveTo(15, 15 + i * this.perWidth)
+      this.context.lineTo(this.canvasWidth - 15, 15 + i * this.perWidth)
+      this.context.stroke()
       this.context.restore()
      }
     this.context.draw()
@@ -237,9 +264,33 @@ Page({
               v = j;
             }
           }
-
         }
       }
+    }
+    this.oneStep(u, v, false);
+    this.chressBord[u][v] = 2;
+    for (var k = 0; k < this.winCounts; k++) {
+      if (this.wins[u][v][k]) {
+        this.computerWin[k]++;
+        this.myWin[k] = 6;//这个位置对方不可能赢了
+        if (this.computerWin[k] == 5) {
+          wx.showModal({
+            title: '提示',
+            content: '计算机赢了,你个渣渣。是否再来一局',
+            success(res) {
+              if (res.confirm) {
+                
+              } else if (res.cancel) {
+                
+              }
+            }
+          })
+          this.over = true;
+        }
+      }
+    }
+    if (!this.over) {
+      this.me = !this.me;
     }
   },
 
