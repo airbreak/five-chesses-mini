@@ -1,6 +1,13 @@
 <!--pages/game/index.wxml-->
+<view>
+<view class="authorization-box-cover" wx:if="{{!hasUserInfo && canIUse}}">
+    <view>第一次进入系统需获取授权,</view>
+    <view>点击按钮获取头像和昵称</view>
+    <button open-type="getUserInfo" bindgetuserinfo="bindGetUserInfo">授权</button>
+  </view>
 <canvas
    style='width:{{canvasWidth}}px; height:{{canvasHeight}}px'
    disable-scroll='true'
    canvas-id="firstCanvas"
    bindtouchstart="setChess"></canvas>
+</view>

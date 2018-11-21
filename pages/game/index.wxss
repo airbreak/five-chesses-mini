@@ -1,1 +1,28 @@
 /* pages/game/index.wxss */
+.authorization-box-cover{
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0,0,0,.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+}
+.authorization-box-cover view{
+  width: 80%;
+  text-align: center;
+  margin: 15rpx auto;
+  font-size: 36rpx;
+  color: #fff;
+}
+.authorization-box-cover button {
+  width: 170rpx;
+  height: 90rpx;
+  line-height: 90rpx;
+  color: #fff;
+  background-color: #306AA7;
+}

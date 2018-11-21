@@ -1,4 +1,6 @@
 // pages/game/index.js
+//获取应用实例
+const app = getApp()
 Page({
 
   /**
@@ -7,6 +9,9 @@ Page({
   data: {
    
   },
+  userInfo: {},
+  hasUserInfo: false,
+  canIUse: wx.canIUse('button.open-type.getUserInfo'),
   context: null,
   //赢法的统计数组
   myWin: [],
@@ -16,21 +21,45 @@ Page({
   over:false,
   me:true,
   chressBord: [],//棋盘
-  perWidth: 20,
+  perWidth: 0,
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
+    this._getUserInfo()
     this.setCanvasSize()
-    // let logo = new Image();
-    // logo.src = 'img/logo.png';
-    // logo.onload = function () {
-    //   context.drawImage(logo, 0, 0, 450, 450);
-     
-    // }
     this.iniWins()
     this.initChressBord()
+  },
+  /*新版本的获取用户信息方式*/
+  _getUserInfo: function (cb) {
+    if (app.globalData.userInfo) {
+      this.setData({
+        userInfo: app.globalData.userInfo,
+        hasUserInfo: true
+      })
+    } else if (this.data.canIUse) {
+      // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
+      // 所以此处加入 callback 以防止这种情况
+      app.userInfoReadyCallback = res => {
+        this.setData({
+          userInfo: res.userInfo,
+          hasUserInfo: true
+        })
+      }
+    } else {
+      // 在没有 open-type=getUserInfo 版本的兼容处理
+      wx.getUserInfo({
+        success: res => {
+          app.globalData.userInfo = res.userInfo
+          this.setData({
+            userInfo: res.userInfo,
+            hasUserInfo: true
+          })
+        }
+      })
+    }
   },
 
   setCanvasSize () {
@@ -43,7 +72,7 @@ Page({
           canvasWidth: that.canvasWidth,
           canvasHeight: that.canvasWidth
         })
-        that.perWidth = Math.floor(this.canvasWidth / 15)
+        that.perWidth = Math.floor(that.canvasWidth / 15)
       }
     })
   },
@@ -90,7 +119,9 @@ Page({
               content: '你赢了,你牛逼。是否再来一局',
               success(res) {
                 if (res.confirm) {
-                  
+                  wx.switchTab({
+                    url: '/pages/game/index'
+                  })
                 } else if (res.cancel) {
 
                 }
@@ -279,7 +310,9 @@ Page({
             content: '计算机赢了,你个渣渣。是否再来一局',
             success(res) {
               if (res.confirm) {
-                
+                wx.switchTab({
+                    url: '/pages/game/index'
+                  })
               } else if (res.cancel) {
                 
               }
