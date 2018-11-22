@@ -1,4 +1,4 @@
-// pages/record/index.js
+// pages/index/record/record.js
 Page({
 
   /**

@@ -2,25 +2,24 @@
   "pages": [
     "pages/index/index",
     "pages/logs/logs",
-    "pages/game/index",
-    "pages/record/index"
+    "pages/record/record"
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#306AA7",
-    "navigationBarTitleText": "五子棋",
-    "navigationBarTextStyle": "#fff"
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "WeChat",
+    "navigationBarTextStyle": "black"
   },
   "tabBar": {
     "list": [
       {
-        "pagePath": "pages/game/index",
+        "pagePath": "pages/index/index",
         "text": "游戏",
         "iconPath": "/assets/images/tabbar/game.png",
         "selectedIconPath": "/assets/images/tabbar/game@selected.png"
       },
       {
-        "pagePath": "pages/record/index",
+        "pagePath": "pages/record/record",
         "text": "记录",
         "iconPath": "/assets/images/tabbar/record.png",
         "selectedIconPath": "/assets/images/tabbar/record@selected.png"
