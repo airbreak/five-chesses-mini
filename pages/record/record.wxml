@@ -1,2 +1,5 @@
 <!--pages/index/record/record.wxml-->
 <text>pages/index/record/record.wxml</text>
+  <i-notice-bar>
+      2018年世界杯,将于6月14日至7月15日举行
+  </i-notice-bar>

@@ -6,9 +6,9 @@
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "WeChat",
-    "navigationBarTextStyle": "black"
+    "navigationBarBackgroundColor": "#306AA7",
+    "navigationBarTitleText": "五子棋",
+    "navigationBarTextStyle": "white"
   },
   "tabBar": {
     "list": [
@@ -20,13 +20,13 @@
       },
       {
         "pagePath": "pages/record/record",
-        "text": "记录",
+        "text": "英雄榜",
         "iconPath": "/assets/images/tabbar/record.png",
         "selectedIconPath": "/assets/images/tabbar/record@selected.png"
       }
     ],
     "backgroundColor": "#ffffff",
-    "selectedColor": "#1b8ae0",
+    "selectedColor": "#306AA7",
     "color": "#000000",
     "borderStyle": "#f5f5f5",
     "position": "bottom"

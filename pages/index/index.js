@@ -4,10 +4,12 @@ const app = getApp()
 
 Page({
   data: {
-    motto: 'Hello World',
+    canvasWidth: 0,
     userInfo: {},
     hasUserInfo: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo')
+    canIUse: wx.canIUse('button.open-type.getUserInfo'),
+    me:true,
+    over:false
   },
   context: null,
   //赢法的统计数组
@@ -19,8 +21,9 @@ Page({
   me: true,
   chressBord: [],//棋盘
   perWidth: 0,
-  
-  onLoad: function () {
+  girdNum: 20, //15*15 棋盘
+ 
+  onLoad () {
     if (app.globalData.userInfo) {
       this.setData({
         userInfo: app.globalData.userInfo,
@@ -63,13 +66,13 @@ Page({
     let that = this
     wx.getSystemInfo({
       success(res) {
-        that.canvasWidth = res.windowWidth
-        // that.canvasHeight = res.windowHeight
+        that.canvasWidth = res.windowWidth - 20  // 左右空格各10px          
+        that.perWidth = Math.floor(that.canvasWidth / that.girdNum)
+        that.canvasWidth = that.perWidth * that.girdNum
         that.setData({
           canvasWidth: that.canvasWidth,
           canvasHeight: that.canvasWidth
         })
-        that.perWidth = Math.floor(that.canvasWidth / 15)
       }
     })
   },
@@ -77,23 +80,36 @@ Page({
   /**
    * 生命周期函数--监听页面初次渲染完成
    */
-  onReady: function (e) {
+  onReady (e) {
     this.context = wx.createCanvasContext('firstCanvas')
-    this.context.setStrokeStyle("#bfbfbf") //边框颜色
-    this.context.setLineWidth(2)
-    // 使用 wx.createContext 获取绘图上下文 context
     this.drawChessBoard();
   },
-  setChess(e) {
+  /**
+   * 重新开始
+   */
+  reStart() {
+    this.clearChessBoard()
+    this.drawChessBoard()
+    this.onLoad()
+    this.setData({
+      me: true,
+      over: false
+    })
+  },
+
+  /**
+   * 落棋
+   */
+  setChess (e) {
     console.log('one more time')
-    if (this.over) {
+    if (this.data.over) {
       return;
     }
-    if (!this.me) {
+    if (!this.data.me) {
       return;
     }
-    var x = e.touches[0].x - 15;
-    var y = e.touches[0].y - 15;
+    var x = e.touches[0].x;
+    var y = e.touches[0].y;
     if (x < 0) {
       x = 0
     }
@@ -103,7 +119,7 @@ Page({
     var i = Math.round(x / this.perWidth);
     var j = Math.round(y / this.perWidth);
     if (this.chressBord[i][j] == 0) {
-      this.oneStep(i, j, this.me);
+      this.oneStep(i, j, this.data.me);
       this.chressBord[i][j] = 1;//我        
 
       for (var k = 0; k < this.winCounts; k++) {
@@ -111,25 +127,28 @@ Page({
           this.myWin[k]++;
           this.computerWin[k] = 6;//这个位置对方不可能赢了
           if (this.myWin[k] == 5) {
+            let that = this
             wx.showModal({
               title: '提示',
               content: '你赢了,你牛逼。是否再来一局',
               success(res) {
                 if (res.confirm) {
-                  wx.switchTab({
-                    url: '/pages/game/index'
-                  })
+                  that.reStart()
                 } else if (res.cancel) {
 
                 }
               }
             })
-            this.over = true;
+            this.setData({
+              over: true
+            })
           }
         }
       }
-      if (!this.over) {
-        this.me = !this.me;
+      if (!this.data.over) {
+        this.setData({
+          me:!this.data.me
+        })
         setTimeout(() => {
           this.computerAI();
         }, 500)
@@ -140,12 +159,12 @@ Page({
   /**
    * 画旗子
    */
-  oneStep(i, j, me) {
+  oneStep (i, j, me) {
     this.context.beginPath();
-    this.context.arc(15 + i * this.perWidth, 15 + j * this.perWidth, this.perWidth / 2, 0, 2 * Math.PI);//画圆
+    this.context.arc(i * this.perWidth, j * this.perWidth, this.perWidth / 2, 0, 2 * Math.PI);//画圆
     this.context.closePath();
 
-    if (this.me) {
+    if (this.data.me) {
       this.context.setFillStyle('#EEEEEE')
     } else {
       this.context.setFillStyle('#000000')
@@ -155,38 +174,50 @@ Page({
     this.context.draw(true)
   },
 
-  //绘画棋盘
-  drawChessBoard() {
-    for (var i = 0; i < 15; i++) {
+  /*
+  **绘画棋盘*
+  */
+  drawChessBoard () {
+    this.context.setStrokeStyle("#bfbfbf") //边框颜色
+    
+    for (var i = 0; i <= this.girdNum; i++) {
+      this.context.setLineWidth(2)
       this.context.save()
-      this.context.moveTo(15 + i * this.perWidth, 15)
-      this.context.lineTo(15 + i * this.perWidth, this.canvasWidth - 15)
+      this.context.moveTo(i * this.perWidth, 0)
+      this.context.lineTo(i * this.perWidth, this.canvasWidth)
       this.context.stroke()
 
-      this.context.moveTo(15, 15 + i * this.perWidth)
-      this.context.lineTo(this.canvasWidth - 15, 15 + i * this.perWidth)
+      this.context.moveTo(0, i * this.perWidth)
+      this.context.lineTo(this.canvasWidth, i * this.perWidth)
       this.context.stroke()
       this.context.restore()
     }
+    this.context.draw()
+  },
+  /**
+   * 清除棋盘
+   */
+  clearChessBoard () {
+    this.context.clearRect(0, 0, this.canvasWidth, this.canvasWidth)
     this.context.draw()
   },
 
   /**
    * 赢法统计
    */
-  iniWins() {
+  iniWins () {
     //赢法数组
-    for (var i = 0; i < 15; i++) {
+    for (var i = 0; i < this.girdNum; i++) {
       this.wins[i] = [];
-      for (var j = 0; j < 15; j++) {
+      for (var j = 0; j < this.girdNum; j++) {
         this.wins[i][j] = [];
       }
     }
 
     var count = 0; //赢法总数
     //横线赢法
-    for (var i = 0; i < 15; i++) {
-      for (var j = 0; j < 11; j++) {
+    for (var i = 0; i < this.girdNum; i++) {
+      for (var j = 0; j < this.girdNum - 4; j++) {
         for (var k = 0; k < 5; k++) {
           this.wins[i][j + k][count] = true;
         }
@@ -195,8 +226,8 @@ Page({
     }
 
     //竖线赢法
-    for (var i = 0; i < 15; i++) {
-      for (var j = 0; j < 11; j++) {
+    for (var i = 0; i < this.girdNum; i++) {
+      for (var j = 0; j < this.girdNum - 4; j++) {
         for (var k = 0; k < 5; k++) {
           this.wins[j + k][i][count] = true;
         }
@@ -205,8 +236,8 @@ Page({
     }
 
     //正斜线赢法
-    for (var i = 0; i < 11; i++) {
-      for (var j = 0; j < 11; j++) {
+    for (var i = 0; i < this.girdNum - 4; i++) {
+      for (var j = 0; j < this.girdNum - 4; j++) {
         for (var k = 0; k < 5; k++) {
           this.wins[i + k][j + k][count] = true;
         }
@@ -215,8 +246,8 @@ Page({
     }
 
     //反斜线赢法
-    for (var i = 0; i < 11; i++) {
-      for (var j = 14; j > 3; j--) {
+    for (var i = 0; i < this.girdNum - 4; i++) {
+      for (var j = this.girdNum - 1; j > 3; j--) {
         for (var k = 0; k < 5; k++) {
           this.wins[i + k][j - k][count] = true;
         }
@@ -229,6 +260,7 @@ Page({
       this.computerWin[i] = 0;
     }
     this.winCounts = count
+    console.log(`全部:${count}`)
   },
 
   computerAI() {
@@ -236,16 +268,16 @@ Page({
     var computerScore = [];
     var max = 0;
     var u = 0, v = 0;
-    for (var i = 0; i < 15; i++) {
+    for (var i = 0; i < this.girdNum; i++) {
       myScore[i] = [];
       computerScore[i] = [];
-      for (var j = 0; j < 15; j++) {
+      for (var j = 0; j < this.girdNum; j++) {
         myScore[i][j] = 0;
         computerScore[i][j] = 0;
       }
     }
-    for (var i = 0; i < 15; i++) {
-      for (var j = 0; j < 15; j++) {
+    for (var i = 0; i < this.girdNum; i++) {
+      for (var j = 0; j < this.girdNum; j++) {
         if (this.chressBord[i][j] == 0) {
           for (var k = 0; k < this.winCounts; k++) {
             if (this.wins[i][j][k]) {
@@ -302,25 +334,28 @@ Page({
         this.computerWin[k]++;
         this.myWin[k] = 6;//这个位置对方不可能赢了
         if (this.computerWin[k] == 5) {
+          let that = this
           wx.showModal({
             title: '提示',
             content: '计算机赢了,你个渣渣。是否再来一局',
             success(res) {
               if (res.confirm) {
-                wx.switchTab({
-                  url: '/pages/game/index'
-                })
+                that.reStart()
               } else if (res.cancel) {
 
               }
             }
           })
-          this.over = true;
+          this.setData({
+            over: true
+          })
         }
       }
     }
-    if (!this.over) {
-      this.me = !this.me;
+    if (!this.data.over) {
+      this.setData({
+        me: !this.data.me
+      })
     }
   },
 
@@ -328,9 +363,9 @@ Page({
    * 初始化棋盘内存信息
    */
   initChressBord() {
-    for (var i = 0; i < 15; i++) {
+    for (var i = 0; i < this.girdNum; i++) {
       this.chressBord[i] = [];
-      for (var j = 0; j < 15; j++) {
+      for (var j = 0; j < this.girdNum; j++) {
         this.chressBord[i][j] = 0;
       }
     }
